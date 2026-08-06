@@ -1,0 +1,104 @@
+@import "leaflet/dist/leaflet.css";
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc; /* خلفية فاتحة ثابتة */
+}
+
+/* إلغاء التظليل والتأثير الضبابي والـ Outline عند الضغط على العناصر والأزرار والإعلانات */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  -webkit-touch-callout: none;
+}
+
+*:focus, *:active, *:focus-visible,
+button:focus, button:active, a:focus, a:active,
+input:focus, select:focus, textarea:focus, div:focus, div:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Animations and keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-in {
+  animation: modalZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.radial-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.logo-anim:hover {
+  transform: rotate(-1deg) scale(1.02);
+  transition: all 0.2s ease-in-out;
+}
+
+/* إصلاح عام وقوي وشامل لجميع حقول الإدخال ومنع ظهور النص الأبيض على الخلفية البيضاء */
+input, textarea, select {
+  color: #0f172a !important; /* نص باللون الأسود الداكن الواضح جداً */
+  caret-color: #2563eb !important;
+}
+
+/* خلفية بيضاء واضحة للحقول إلا إذا تم تخصيص خلفية معينة */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+textarea,
+select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* خيارات القوائم المنسدلة */
+select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* ألوان النص النائب (Placeholder) باللون الرمادي الداكن لسهولة القراءة */
+input::placeholder, 
+textarea::placeholder, 
+select::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+/* معالجة الإكمال التلقائي في المتصفحات (Webkit Autofill) التي تجعل النص أبيض */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #0f172a !important;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
