@@ -12,6 +12,9 @@ import android.view.View;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -24,7 +27,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TARGET_URL = "https://ais-pre-yosagmel7qbtoq2pwhluao-475573028031.europe-west2.run.app/";
+    private static final String TARGET_URL = "https://axp-kappa.vercel.app/";
     private static final int FILECHOOSER_RESULTCODE = 1001;
     private static final int PERMISSION_REQUEST_CODE = 2002;
 
@@ -79,6 +82,25 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 mSwipeRefresh.setRefreshing(false);
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                super.onReceivedHttpError(view, request, errorResponse);
+                if (request != null && request.isForMainFrame()) {
+                    int statusCode = errorResponse != null ? errorResponse.getStatusCode() : 0;
+                    if (statusCode == 404 || statusCode >= 500) {
+                        view.loadUrl(TARGET_URL);
+                    }
+                }
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+                if (failingUrl != null && !failingUrl.equals(TARGET_URL)) {
+                    view.loadUrl(TARGET_URL);
+                }
             }
 
             @Override
