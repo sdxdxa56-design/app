@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Sitemap: https://axp-kappa.vercel.app/sitemap.xml
+
+# روابط مهمة للفهرسة
+Allow: /ad/
+Allow: /category/
+Allow: /city/
+
+# منع فهرسة صفحات الإدارة
+Disallow: /admin
+Disallow: /api/
