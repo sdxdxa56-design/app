@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "opensooq_listings": {
+      "title": "OpenSooq Listings",
+      "description": "User posted advertisements for OpenSooq Yemen",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "subcategory": { "type": "string" },
+        "city": { "type": "string" },
+        "phone": { "type": "string" },
+        "image": { "type": "string" },
+        "images": { "type": "array" },
+        "ownerName": { "type": "string" },
+        "views": { "type": "number" },
+        "created_at": { "type": "string" }
+      }
+    },
+    "opensooq_messages": {
+      "title": "OpenSooq Messages",
+      "description": "Live messaging chat logs between buyers and sellers",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "adId": { "type": "string" },
+        "adTitle": { "type": "string" },
+        "senderPhone": { "type": "string" },
+        "senderName": { "type": "string" },
+        "receiverPhone": { "type": "string" },
+        "text": { "type": "string" },
+        "created_at": { "type": "string" }
+      }
+    },
+    "opensooq_users": {
+      "title": "OpenSooq Users",
+      "description": "User profiles registered with a Yemeni phone number and name",
+      "type": "object",
+      "properties": {
+        "phone": { "type": "string" },
+        "name": { "type": "string" },
+        "password": { "type": "string" },
+        "created_at": { "type": "string" }
+      }
+    },
+    "opensooq_banners": {
+      "title": "OpenSooq Banners",
+      "description": "Promotional banners displayed on the home page",
+      "type": "object",
+      "properties": {
+        "imageUrl": { "type": "string" },
+        "link": { "type": "string" },
+        "title": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/opensooq_listings/{adId}": {
+      "schema": "opensooq_listings",
+      "description": "Main advertisements feed"
+    },
+    "/opensooq_messages/{messageId}": {
+      "schema": "opensooq_messages",
+      "description": "Direct message history for user chatrooms"
+    },
+    "/opensooq_users/{userId}": {
+      "schema": "opensooq_users",
+      "description": "User registrations and validation profiles"
+    },
+    "/opensooq_banners/{bannerId}": {
+      "schema": "opensooq_banners",
+      "description": "Promotional banner advertisements customized by admin"
+    }
+  }
+}
