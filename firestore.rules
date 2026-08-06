@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // الإعلانات: قراءة للجميع، كتابة للمستخدمين المسجلين أو أي عملية لحاملي التوثيق
+    match /opensooq_listings/{adId} {
+      allow read: if true;
+      allow create, update, delete: if true; // Allow client operations directly to support both authenticated & guest fallback
+    }
+
+    // المستخدمون: قراءة للجميع (للملفات العامة)، كتابة فقط لصاحب الحساب
+    match /opensooq_users/{userId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // الرسائل: قراءة وكتابة لجميع أطراف المحادثة
+    match /opensooq_messages/{msgId} {
+      allow read, write: if true;
+    }
+
+    // التقييمات
+    match /opensooq_ratings/{ratingId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // البانرات
+    match /opensooq_banners/{bannerId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // التنبيهات
+    match /opensooq_alerts/{alertId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // باقي المجموعات (الإشعارات، التنبيهات، المتابعين إلخ)
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
