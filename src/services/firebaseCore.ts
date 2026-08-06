@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react';
 import { initializeApp } from "firebase/app";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // User provided Firebase configuration from console.firebase.google.com
@@ -14,9 +14,13 @@ const firebaseConfig = {
   appId: "1:836687507956:web:f66980e5a6accf5b60c9a1"
 };
 
-// Initialize Firebase
+// Initialize Firebase with persistent local cache for seamless offline operation
 export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+});
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
