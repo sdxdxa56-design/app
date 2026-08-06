@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Red Grocery Cart Top Basket -->
+    <path
+        android:fillColor="#DC2626"
+        android:pathData="M28,42 L80,42 L74,56 L28,56 Z" />
+
+    <!-- White Grocery Cart Lower Stripe -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,56 L74,56 L70,66 L32,66 Z" />
+
+    <!-- Cart Frame and Handle -->
+    <path
+        android:fillColor="#0f172a"
+        android:pathData="M80,32 C82,32 83,33.5 82.5,35 L80.5,41 L76.5,41 L78,36 L28,36 L32,66 C32.5,69 34.5,70 37,70 L68,70 C69.5,70 70.5,69 71,67.5 L73,61 L76,62 L74,68 C72.5,72 69.5,73.5 67,73.5 L36,73.5 C31,73.5 28.5,70 27.5,65 L24,35 L80,32 Z" />
+
+    <!-- Wheels -->
+    <path
+        android:fillColor="#0f172a"
+        android:pathData="M40,79 A5,5 0 1,1 40,78.9 Z M62,79 A5,5 0 1,1 62,78.9 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,79 A2,2 0 1,1 40,78.9 Z M62,79 A2,2 0 1,1 62,78.9 Z" />
+
+    <!-- Items inside cart: Apple, Bottle, Bakery -->
+    <path
+        android:fillColor="#DC2626"
+        android:pathData="M32,36 C30,28 38,26 42,32 C46,26 52,28 50,36 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,36 L54,24 L60,24 L62,36 Z" />
+    <path
+        android:fillColor="#DC2626"
+        android:pathData="M54,24 L60,24 L60,27 L54,27 Z" />
+</vector>
