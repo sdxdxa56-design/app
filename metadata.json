@@ -1,0 +1,6 @@
+{
+  "name": "Yemeni OpenSooq Clone",
+  "description": "منصة السوق المفتوح اليمنية للبيع والشراء - سيارات، عقارات، جوالات، ووظائف مع لوحة تحكم مطور متكاملة للمزامنة مع GitHub و Supabase",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
