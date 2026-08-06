@@ -46,4 +46,3 @@ jobs:
             android/app/build/outputs/apk/debug/*.apk
             android/app/build/outputs/apk/**/*.apk
           retention-days: 30
-          
