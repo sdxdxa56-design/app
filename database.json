@@ -1,0 +1,61 @@
+{
+  "listings": [
+    {
+      "id": "1",
+      "title": "هيونداي سوناتا 2020 ليميتد فل كامل فحص كامل بريدجستون شاحن لاسلكي",
+      "description": "هيونداي سوناتا 2020 هايبرد ليميتد، لون أسود ملوكي دهان الشركة، فتحة بانوراما، فحص كامل 7 جيد بدون ملاحظات، حواف كروم، شاشة كبيرة مع كاميرا خلفية، اضاءة ليد ترحيبية، كوشوك جديد، ترخيص سنة كاملة. السيارة لا تحتاج لأي صيانة البيع كاش.",
+      "price": 19800,
+      "category": "cars",
+      "subcategory": "سيارات للبيع",
+      "city": "صنعاء",
+      "phone": "777123456",
+      "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800"
+      ],
+      "createdAt": "قبل ساعتين",
+      "views": 142,
+      "ownerName": "أبو يوسف الجبور",
+      "isFeatured": true
+    },
+    {
+      "id": "2",
+      "title": "شقة فاخرة للبيع في حدة - ٣ نوم مع بلكونة اطلالة مميزة",
+      "description": "شقة سوبر ديلوكس في ارقى مناطق حدة بصنعاء، الطابق الثاني، مساحة 180 متر مربع، 3 غرف نوم واحدة ماستر، صالون واسع مع بلكونة مطلة، صالة معيشة مستقلة، مطبخ راكب خشب كلاسيكي، تدفئة مستقلة، كراج سيارة ومخزن مستقل.",
+      "price": 125000,
+      "category": "properties",
+      "subcategory": "شقق للبيع",
+      "city": "صنعاء",
+      "phone": "777654321",
+      "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"
+      ],
+      "createdAt": "قبل 5 ساعات",
+      "views": 89,
+      "ownerName": "مجموعة حدة العقارية",
+      "isFeatured": true
+    },
+    {
+      "id": "3",
+      "title": "ايفون 15 برو ماكس 256 جيجا تيتانيوم طبيعي بحالة الوكالة نسبة البطارية 96%",
+      "description": "آيفون 15 برو ماكس iPhone 15 Pro Max، كفالة دولية لغاية نهاية السنة، لون تيتانيوم طبيعي، سعة 256 جيجا، لم يدخل الصيانة مطلقاً، مع الكرتونة والشاحن الأصلي، شاشة حماية نانو راكبة من اليوم الأول.",
+      "price": 840,
+      "category": "mobiles",
+      "subcategory": "هواتف ذكية",
+      "city": "صنعاء",
+      "phone": "733987654",
+      "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&q=80&w=800",
+      "images": [
+        "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&q=80&w=800"
+      ],
+      "createdAt": "قبل 10 دقائق",
+      "views": 310,
+      "ownerName": "معرض صنعاء للموبايل"
+    }
+  ],
+  "users": [],
+  "messages": []
+}
