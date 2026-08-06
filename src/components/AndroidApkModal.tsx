@@ -62,9 +62,9 @@ jobs:
           retention-days: 30
 `;
 
-  // Direct URLs with pre-filled content parameter
-  const editWorkflowFileUrl = `https://github.com/${ownerRepo}/edit/main/.github/workflows/build-apk.yml?value=${encodeURIComponent(workflowYamlContent)}`;
+  // Direct URLs for both creating a new workflow file or editing an existing one
   const createWorkflowFileUrl = `https://github.com/${ownerRepo}/new/main?filename=.github/workflows/build-apk.yml&value=${encodeURIComponent(workflowYamlContent)}&message=${encodeURIComponent('Add Android APK workflow')}`;
+  const editWorkflowFileUrl = `https://github.com/${ownerRepo}/edit/main/.github/workflows/build-apk.yml?value=${encodeURIComponent(workflowYamlContent)}`;
   const directActionsUrl = `https://github.com/${ownerRepo}/actions`;
   const directWorkflowUrl = `https://github.com/${ownerRepo}/actions/workflows/build-apk.yml`;
 
@@ -74,11 +74,15 @@ jobs:
     setTimeout(() => setCopied(false), 3000);
   };
 
-  const handleOneClickLaunch = () => {
-    // Copy code automatically for maximum convenience
+  const handleCreateNewWorkflow = () => {
     navigator.clipboard.writeText(workflowYamlContent);
     setCopied(true);
-    // Open the direct workflow edit/update page on GitHub (since file already exists)
+    window.open(createWorkflowFileUrl, '_blank');
+  };
+
+  const handleEditWorkflow = () => {
+    navigator.clipboard.writeText(workflowYamlContent);
+    setCopied(true);
     window.open(editWorkflowFileUrl, '_blank');
   };
 
@@ -115,34 +119,42 @@ jobs:
         {/* Content Body */}
         <div className="p-6 space-y-5">
 
-          {/* Solution for Existing File Error */}
+          {/* Explanation for 404 on New Repositories */}
           <div className="bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-300 dark:border-amber-800 p-4 rounded-2xl space-y-2 text-xs text-amber-950 dark:text-amber-100">
             <h3 className="font-black text-amber-900 dark:text-amber-300 text-sm flex items-center gap-1.5">
-              💡 سبب ظهور خطأ (A file with the same name already exists):
+              💡 سبب ظهور خطأ 404 (Page Not Found):
             </h3>
             <p className="font-semibold leading-relaxed">
-              هذا يعني أن ملف البناء <code className="bg-amber-100 dark:bg-amber-900 px-1.5 py-0.5 rounded font-mono font-bold">build-apk.yml</code> موجود بالفعل في مستودعك على GitHub!
+              عند تحويل المستودع إلى <code className="bg-amber-100 dark:bg-amber-900 px-1.5 py-0.5 rounded font-mono font-bold">sdxdxa56-design/app</code> الجديد، فإن الملف غير موجود حتى الآن على GitHub! يمكنك استخدام الخيار الأول بالأسفل لإنشاء الملف بضغطة واحدة تلقائياً.
             </p>
           </div>
 
           {/* THE PRIMARY BUTTONS FOR BOTH CASES */}
           <div className="space-y-3">
             <button
-              onClick={handleOneClickLaunch}
+              onClick={handleCreateNewWorkflow}
               className="w-full bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-base cursor-pointer border-2 border-emerald-300"
             >
               <ExternalLink className="w-6 h-6 text-amber-300 animate-bounce shrink-0" />
-              <span>✏️ تعديل وتحديث الملف الموجود حالياً على GitHub ↗️</span>
+              <span>➕ إنشاء ملف البناء الجديد على مستودع app تلقائياً ↗️</span>
+            </button>
+
+            <button
+              onClick={handleEditWorkflow}
+              className="w-full bg-slate-800 hover:bg-slate-700 text-white font-black py-3.5 px-5 rounded-xl shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer transition-all border border-slate-700"
+            >
+              <ExternalLink className="w-5 h-5 text-emerald-400" />
+              <span>✏️ تعديل وتحديث الملف (إذا كان الملف موجوداً سابقاً) ↗️</span>
             </button>
 
             <a
               href={directWorkflowUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-slate-800 hover:bg-slate-700 text-white font-black py-3.5 px-5 rounded-xl shadow-md flex items-center justify-center gap-2 text-sm no-underline transition-all border border-slate-700"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-slate-200 font-extrabold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs no-underline transition-all border border-slate-700"
             >
-              <Play className="w-5 h-5 text-emerald-400 animate-pulse" />
-              <span>🚀 أو تشغيل البناء مباشرة دون تعديل (Run Workflow) ↗️</span>
+              <Play className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span>🚀 تشغيل البناء مباشرة من GitHub Actions ↗️</span>
             </a>
             
             {copied && (
