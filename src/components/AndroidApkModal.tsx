@@ -11,6 +11,8 @@ export default function AndroidApkModal({ onClose, lang }: AndroidApkModalProps)
   // Fixed target repo for the user with zero typing
   const ownerRepo = 'sdxdxa56-design/app';
   const [copied, setCopied] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
   const workflowYamlContent = `name: Build Android APK
 
@@ -74,6 +76,35 @@ jobs:
     setTimeout(() => setCopied(false), 3000);
   };
 
+  const handleAutoPushToGitHub = async () => {
+    setIsSyncing(true);
+    setSyncStatus('جاري رفع الكود وملف البناء تلقائياً إلى مستودع app...');
+    try {
+      const storedToken = localStorage.getItem('github_token') || '';
+      const response = await fetch('/api/github/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: storedToken,
+          repoName: 'app'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSyncStatus('✅ تم رفع جميع ملفات المشروع وملف البناء تلقائياً إلى sdxdxa56-design/app! تم بدء عملية البناء في GitHub Actions.');
+        setTimeout(() => {
+          window.open(directActionsUrl, '_blank');
+        }, 1500);
+      } else {
+        setSyncStatus(`⚠️ ${data.message || 'فشل المزامنة المباشرة'}`);
+      }
+    } catch (e: any) {
+      setSyncStatus(`❌ حدث خطأ أثناء المزامنة: ${e?.message || 'تعذر الاتصال بالخادم'}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleCreateNewWorkflow = () => {
     navigator.clipboard.writeText(workflowYamlContent);
     setCopied(true);
@@ -132,11 +163,26 @@ jobs:
           {/* THE PRIMARY BUTTONS FOR BOTH CASES */}
           <div className="space-y-3">
             <button
-              onClick={handleCreateNewWorkflow}
-              className="w-full bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-base cursor-pointer border-2 border-emerald-300"
+              onClick={handleAutoPushToGitHub}
+              disabled={isSyncing}
+              className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black py-4 px-6 rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-base cursor-pointer border-2 border-blue-400 disabled:opacity-60"
             >
-              <ExternalLink className="w-6 h-6 text-amber-300 animate-bounce shrink-0" />
-              <span>➕ إنشاء ملف البناء الجديد على مستودع app تلقائياً ↗️</span>
+              <Sparkles className="w-6 h-6 text-amber-300 animate-spin shrink-0" />
+              <span>{isSyncing ? 'جاري رفع الكود وملف البناء الان...' : '⚡ رفع كامل الكود وملف البناء تلقائياً إلى مستودع app المباشر 🚀'}</span>
+            </button>
+
+            {syncStatus && (
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/80 text-blue-900 dark:text-blue-200 border border-blue-300 dark:border-blue-800 rounded-xl text-xs font-bold leading-relaxed text-center">
+                {syncStatus}
+              </div>
+            )}
+
+            <button
+              onClick={handleCreateNewWorkflow}
+              className="w-full bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-3.5 px-5 rounded-2xl shadow-md hover:scale-[1.01] transition-all flex items-center justify-center gap-2.5 text-sm cursor-pointer border border-emerald-300"
+            >
+              <ExternalLink className="w-5 h-5 text-amber-300 shrink-0" />
+              <span>➕ إنشاء ملف البناء الجديد يدوياً على مستودع app ↗️</span>
             </button>
 
             <button
