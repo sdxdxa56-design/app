@@ -1375,7 +1375,6 @@ app.post("/api/github/push", async (req, res) => {
             file === "node_modules" ||
             file === "dist" ||
             file === ".git" ||
-            file === ".github" ||
             file === "functions" ||
             file === "api"
           ) {
