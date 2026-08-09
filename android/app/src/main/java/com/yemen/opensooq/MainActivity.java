@@ -2,13 +2,15 @@ package com.yemen.opensooq;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -34,19 +36,18 @@ public class MainActivity extends AppCompatActivity {
     private WebView mWebView;
     private SwipeRefreshLayout mSwipeRefresh;
     private ValueCallback<Uri[]> mFilePathCallback;
+    private Dialog mPopupDialog; // متغير لحفظ النافذة المنبثقة
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Dynamic Layout creation to ensure maximum speed and compatibility
         mSwipeRefresh = new SwipeRefreshLayout(this);
         mWebView = new WebView(this);
         mSwipeRefresh.addView(mWebView);
         setContentView(mSwipeRefresh);
 
-        // Configure WebView settings for ultra-fast performance
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
@@ -61,8 +62,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setSupportMultipleWindows(true);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        
-        // Custom Chrome User Agent to allow Google Sign-In inside Android WebView
+
         String customUA = "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36";
         webSettings.setUserAgentString(customUA);
 
@@ -70,15 +70,8 @@ public class MainActivity extends AppCompatActivity {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
 
-        // Pull to refresh support
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                mWebView.reload();
-            }
-        });
+        mSwipeRefresh.setOnRefreshListener(() -> mWebView.reload());
 
-        // WebView Client for handling internal vs external links (WhatsApp, Calls, etc.)
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -109,12 +102,10 @@ public class MainActivity extends AppCompatActivity {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url == null) return false;
 
-                // Handle WhatsApp, Phone, Location and External links
-                if (url.startsWith("whatsapp://") || url.startsWith("https://wa.me/") || 
+                if (url.startsWith("whatsapp://") || url.startsWith("https://wa.me/") ||
                     url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("geo:")) {
                     try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(intent);
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                         return true;
                     } catch (Exception e) {
                         Toast.makeText(MainActivity.this, "تعذر فتح التطبيق المطلوب", Toast.LENGTH_SHORT).show();
@@ -122,17 +113,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // Internal site navigation and auth domains stay inside WebView
-                if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") || 
-                    url.contains("netlify.app") || url.contains("axp-kappa.vercel.app") || 
+                // السماح بجميع روابط المنصة وروابط المصادقة بالمرور
+                if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") ||
+                    url.contains("netlify.app") || url.contains("axp-kappa.vercel.app") ||
                     url.contains("firebaseapp.com") || url.contains("google.com") || url.contains("accounts.google")) {
                     return false;
                 }
 
-                // External websites open in device browser
                 try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(intent);
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
                 } catch (Exception e) {
                     return false;
@@ -140,43 +129,74 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // WebChromeClient for File Uploads (Images/Camera), Location & Popup Windows
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
             }
 
+            // =================================================================
+            // [الإصلاح الرئيسي] عرض النافذة المنبثقة داخل Dialog ليراها المستخدم
+            // =================================================================
             @Override
             public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                // 1. إنشاء WebView جديد للنافذة المنبثقة
                 WebView popupWebView = new WebView(MainActivity.this);
                 WebSettings popupSettings = popupWebView.getSettings();
                 popupSettings.setJavaScriptEnabled(true);
                 popupSettings.setDomStorageEnabled(true);
                 popupSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-                popupSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36");
+                popupSettings.setUserAgentString(customUA);
 
                 popupWebView.setWebChromeClient(new WebChromeClient() {
                     @Override
                     public void onCloseWindow(WebView window) {
-                        mWebView.removeView(window);
+                        // عند إغلاق النافذة، نغلق الـ Dialog
+                        if (mPopupDialog != null && mPopupDialog.isShowing()) {
+                            mPopupDialog.dismiss();
+                            mPopupDialog = null;
+                        }
                     }
                 });
+
                 popupWebView.setWebViewClient(new WebViewClient() {
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                        return false;
+                        view.loadUrl(url);
+                        return true;
+                    }
+
+                    @Override
+                    public void onPageFinished(WebView view, String url) {
+                        super.onPageFinished(view, url);
                     }
                 });
 
-                mWebView.addView(popupWebView);
+                // 2. إنشاء Dialog (نافذة حوارية) لعرض الـ WebView الجديد
+                mPopupDialog = new Dialog(MainActivity.this);
+                mPopupDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                mPopupDialog.setContentView(popupWebView, new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+                mPopupDialog.setCancelable(true);
+                mPopupDialog.setOnCancelListener(dialog -> {
+                    // عند الضغط على زر الرجوع، أغلق النافذة ونظفها
+                    if (mPopupDialog != null) {
+                        mPopupDialog.dismiss();
+                        mPopupDialog = null;
+                    }
+                });
+
+                mPopupDialog.show();
+
+                // 3. ربط الـ WebView الجديد بالرسالة الأصلية
                 WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
                 transport.setWebView(popupWebView);
                 resultMsg.sendToTarget();
+
                 return true;
             }
 
-            // Android 5.0+ File Chooser for Photo Uploads
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 if (mFilePathCallback != null) {
@@ -198,8 +218,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         checkAndRequestPermissions();
-
-        // Load the website
         mWebView.loadUrl(TARGET_URL);
     }
 
@@ -240,7 +258,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mWebView != null && mWebView.canGoBack()) {
+        if (mPopupDialog != null && mPopupDialog.isShowing()) {
+            mPopupDialog.dismiss();
+            mPopupDialog = null;
+        } else if (mWebView != null && mWebView.canGoBack()) {
             mWebView.goBack();
         } else {
             super.onBackPressed();
