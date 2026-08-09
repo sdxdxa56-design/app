@@ -83,12 +83,17 @@ export default function AuthModal({ onClose, onLoginSuccess, lang }: AuthModalPr
 
   const handleGoogleLogin = async () => {
     setError('');
+    setIsSubmitting(true);
     try {
       const user = await loginWithGoogle();
-      onLoginSuccess(user);
-      onClose();
+      if (user && user.email) {
+        onLoginSuccess(user);
+        onClose();
+      }
     } catch (err: any) {
       setError(`❌ ${err.message || (lang === 'ar' ? 'فشل تسجيل الدخول عبر جوجل' : 'Google sign-in failed')}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
