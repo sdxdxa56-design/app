@@ -156,7 +156,7 @@ export default function SellerProfileModal({
         <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1">
           {/* Seller Top Card */}
           <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/20 border border-blue-100/60 p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
-            <div className="absolute right-0 top-0 translate-x-1/3 -translate-y-1/3 w-40 h-40 bg-blue-100/20 rounded-full blur-2xl"></div>
+            <div className="absolute right-0 top-0 translate-x-1/3 -translate-y-1/3 w-40 h-40 bg-blue-100/20 rounded-full"></div>
             
             {/* Avatar */}
             <div className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-3xl border-4 border-white shadow-lg shrink-0">
