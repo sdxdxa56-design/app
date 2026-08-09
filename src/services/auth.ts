@@ -248,16 +248,32 @@ export async function loginWithGoogle(): Promise<{ name: string; email: string; 
   } catch (error: any) {
     console.error("Google Login Error:", error);
 
+    // Fallback to redirect if popup is blocked
+    if (
+      error.code === 'auth/popup-blocked' ||
+      error.code === 'auth/operation-not-supported-in-this-environment'
+    ) {
+      try {
+        await signInWithRedirect(auth, provider);
+        return { name: 'جاري التحويل...', email: '', phone: '' };
+      } catch (redirectErr: any) {
+        console.error("Google Redirect Fallback Error:", redirectErr);
+      }
+    }
+
     if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
       throw new Error("تم إغلاق نافذة اختيار حساب جوجل قبل الإكمال.");
     }
     if (error.code === 'auth/popup-blocked') {
-      throw new Error("تم حظر النافذة المنبثقة في المتصفح. يرجى السماح بالنوافذ المنبثقة لإكمال تسجيل الدخول بجوجل.");
+      throw new Error("تم حظر النافذة المنبثقة في متصفحك. يرجى السماح بالنوافذ المنبثقة أو استخدام التسجيل بالبريد الإلكتروني.");
     }
-    if (error.message?.includes('missing initial state') || error.code === 'auth/unauthorized-domain') {
-      throw new Error("تعذر الاتصال بخدمة جوجل في هذه البيئة. يرجى تسجيل الدخول بالبريد الإلكتروني المباشر.");
+    if (error.code === 'auth/unauthorized-domain') {
+      throw new Error("هذا النطاق غير مضاف في Firebase Authorized Domains. يمكنك التسجيل المباشر بالبريد الإلكتروني.");
     }
-    throw new Error(error.message || "فشل تسجيل الدخول عبر حساب جوجل. يمكنك تسجيل الدخول بالبريد الإلكتروني.");
+    if (error.message?.includes('missing initial state')) {
+      throw new Error("تعذر الاتصال بخدمة جوجل في هذه البيئة. يرجى تسجيل الدخول بالبريد الإلكتروني.");
+    }
+    throw new Error(error.message || "فشل تسجيل الدخول عبر حساب جوجل. يمكنك استخدام التسجيل بالبريد الإلكتروني.");
   }
 }
 
