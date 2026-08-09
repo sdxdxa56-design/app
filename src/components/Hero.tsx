@@ -20,8 +20,8 @@ export default function Hero({ selectedCategory, onCategorySelect, onSearch }: H
       <div className="max-w-7xl mx-auto">
         {/* Banner Card */}
         <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-850 text-white rounded-3xl p-8 shadow-xl text-center relative overflow-hidden mb-10">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full -ml-32 -mb-32 pointer-events-none"></div>
 
           <p className="inline-block bg-amber-400 text-blue-950 text-[10px] sm:text-xs font-black px-4 py-1.5 rounded-full mb-4 shadow">
             🇾🇪 السوق المفتوح اليمني الأول والآمن لبيع وشراء وصيانة السلع بدون أي عمولة أو وسيط!
