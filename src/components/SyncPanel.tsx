@@ -170,8 +170,8 @@ service cloud.firestore {
   if (isProductionSite) {
     return (
       <div className="bg-gradient-to-r from-blue-900 via-blue-950 to-slate-900 rounded-3xl border border-blue-800 p-6 md:p-8 text-white text-right font-sans mt-8 shadow-lg relative overflow-hidden" dir="rtl" id="developer_rights_card">
-        <div className="absolute right-0 bottom-0 w-44 h-44 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute left-0 top-0 w-32 h-32 bg-amber-400/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="absolute right-0 bottom-0 w-44 h-44 bg-blue-500/10 rounded-full pointer-events-none"></div>
+        <div className="absolute left-0 top-0 w-32 h-32 bg-amber-400/5 rounded-full pointer-events-none"></div>
         
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
           <div className="space-y-3">
