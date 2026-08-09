@@ -57,11 +57,13 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setUseWideViewPort(true);
         webSettings.setBuiltInZoomControls(false);
         webSettings.setSupportZoom(false);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setSupportMultipleWindows(true);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         
-        // Mobile User Agent for clean display
-        String customUA = webSettings.getUserAgentString() + " YemenOpenSooqApp/1.0";
+        // Custom Chrome User Agent to allow Google Sign-In inside Android WebView
+        String customUA = "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36";
         webSettings.setUserAgentString(customUA);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -120,19 +122,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // Handle Google Sign-In and Google Accounts in external browser to prevent WebView blocked errors
-                if (url.contains("accounts.google.com") || url.contains("accounts.google") || url.contains("google.com/accounts")) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(intent);
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                }
-
-                // Internal site navigation stays inside WebView
-                if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") || url.contains("netlify.app") || url.contains("axp-kappa.vercel.app")) {
+                // Internal site navigation and auth domains stay inside WebView
+                if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") || 
+                    url.contains("netlify.app") || url.contains("axp-kappa.vercel.app") || 
+                    url.contains("firebaseapp.com") || url.contains("google.com") || url.contains("accounts.google")) {
                     return false;
                 }
 
@@ -147,11 +140,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // WebChromeClient for File Uploads (Images/Camera) & Location
+        // WebChromeClient for File Uploads (Images/Camera), Location & Popup Windows
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
+            }
+
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                WebView popupWebView = new WebView(MainActivity.this);
+                WebSettings popupSettings = popupWebView.getSettings();
+                popupSettings.setJavaScriptEnabled(true);
+                popupSettings.setDomStorageEnabled(true);
+                popupSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+                popupSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36");
+
+                popupWebView.setWebChromeClient(new WebChromeClient() {
+                    @Override
+                    public void onCloseWindow(WebView window) {
+                        mWebView.removeView(window);
+                    }
+                });
+                popupWebView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                        return false;
+                    }
+                });
+
+                mWebView.addView(popupWebView);
+                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(popupWebView);
+                resultMsg.sendToTarget();
+                return true;
             }
 
             // Android 5.0+ File Chooser for Photo Uploads
