@@ -24,8 +24,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: \${{ github.workflow }}-\${{ github.ref }}
-  cancel-in-progress: false
+  group: \${{ github.workflow }}-\${{ github.run_id }}
 
 jobs:
   build:
