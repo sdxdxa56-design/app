@@ -216,6 +216,7 @@ export async function loginWithGoogle(): Promise<{ name: string; email: string; 
   const provider = new GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
+  provider.setCustomParameters({ prompt: 'select_account' });
 
   try {
     const result = await signInWithPopup(auth, provider);
@@ -247,28 +248,16 @@ export async function loginWithGoogle(): Promise<{ name: string; email: string; 
   } catch (error: any) {
     console.error("Google Login Error:", error);
 
-    // If popups are blocked or not supported (e.g. in WebView / mobile browser restriction), fallback to redirect
-    if (
-      error.code === 'auth/popup-blocked' ||
-      error.code === 'auth/operation-not-supported-in-this-environment' ||
-      error.code === 'auth/popup-closed-by-user' && /Mobi|Android|iPhone/i.test(navigator.userAgent)
-    ) {
-      try {
-        await signInWithRedirect(auth, provider);
-        return { name: 'جاري التحويل إلى جوجل...', email: '', phone: '' };
-      } catch (redirectErr: any) {
-        console.error("Google Redirect Error:", redirectErr);
-        throw new Error("تعذر فتح نافذة حسابات جوجل. يرجى تجربة فتح الموقع في متصفح كروم أصلية.");
-      }
-    }
-
     if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
-      throw new Error("تم إغلاق نافذة تسجيل الدخول قبل الإكمال.");
+      throw new Error("تم إغلاق نافذة اختيار حساب جوجل قبل الإكمال.");
+    }
+    if (error.code === 'auth/popup-blocked') {
+      throw new Error("تم حظر النافذة المنبثقة في المتصفح. يرجى السماح بالنوافذ المنبثقة لإكمال تسجيل الدخول بجوجل.");
     }
     if (error.message?.includes('missing initial state') || error.code === 'auth/unauthorized-domain') {
-      throw new Error("تنبيه أمان: يرجى التأكد من قبول النطاق في إعدادات Firebase Authorized Domains، أو سماح المتصفح بملفات الكوكيز.");
+      throw new Error("تعذر الاتصال بخدمة جوجل في هذه البيئة. يرجى تسجيل الدخول بالبريد الإلكتروني المباشر.");
     }
-    throw error;
+    throw new Error(error.message || "فشل تسجيل الدخول عبر حساب جوجل. يمكنك تسجيل الدخول بالبريد الإلكتروني.");
   }
 }
 
