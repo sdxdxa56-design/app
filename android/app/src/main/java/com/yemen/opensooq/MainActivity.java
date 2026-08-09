@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,7 +26,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TARGET_URL = "https://axp-kappa.vercel.app/";
+    // الرابط الرسمي المستضاف للتطبيق
+    private static final String TARGET_URL = "https://ais-pre-yosagmel7qbtoq2pwhluao-475573028031.europe-west2.run.app/";
     private static final int FILECHOOSER_RESULTCODE = 1001;
     private static final int PERMISSION_REQUEST_CODE = 2002;
 
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         mSwipeRefresh = new SwipeRefreshLayout(this);
         mWebView = new WebView(this);
+        mWebView.setBackgroundColor(Color.WHITE); // خلفية بيضاء لضمان الوضوح التام
+        
         mSwipeRefresh.addView(mWebView);
         setContentView(mSwipeRefresh);
 
@@ -54,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setBuiltInZoomControls(false);
         webSettings.setSupportZoom(false);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        // إلغاء دعم النوافذ المتعددة لمنع ظهور أية نوافذ حوارية أو شاشة ضبابية عند الضغط
         webSettings.setSupportMultipleWindows(false);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
@@ -80,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 super.onReceivedHttpError(view, request, errorResponse);
                 if (request != null && request.isForMainFrame()) {
                     int statusCode = errorResponse != null ? errorResponse.getStatusCode() : 0;
-                    if (statusCode == 404 || statusCode >= 500) {
+                    if ((statusCode == 404 || statusCode >= 500) && request.getUrl() != null && !request.getUrl().toString().equals(TARGET_URL)) {
                         view.loadUrl(TARGET_URL);
                     }
                 }
@@ -109,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // السماح بجميع الروابط بالتحميل المباشر داخل نفس الـ WebView بدون فتح متصفح خارجي أو نوافذ فرعية
+                // السماح بتحميل كافة روابط التطبيق وروابط المصادقة داخل الـ WebView مباشرة
                 if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") ||
                     url.contains("netlify.app") || url.contains("axp-kappa.vercel.app") ||
                     url.contains("firebaseapp.com") || url.contains("google.com") || url.contains("accounts.google")) {
@@ -123,36 +126,20 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (request != null && request.getUrl() != null) {
+                    return shouldOverrideUrlLoading(view, request.getUrl().toString());
+                }
+                return false;
+            }
         });
 
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
-            }
-
-            // توجيه أي طلب فتح نافذة جديدة تلقائياً إلى الـ WebView الرئيسي لمنع الشاشة الضبابية
-            @Override
-            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
-                WebView newWebView = new WebView(view.getContext());
-                newWebView.setWebViewClient(new WebViewClient() {
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view2, String url) {
-                        mWebView.loadUrl(url);
-                        return true;
-                    }
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view2, WebResourceRequest request) {
-                        if (request != null && request.getUrl() != null) {
-                            mWebView.loadUrl(request.getUrl().toString());
-                        }
-                        return true;
-                    }
-                });
-                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-                transport.setWebView(newWebView);
-                resultMsg.sendToTarget();
-                return true;
             }
 
             @Override
