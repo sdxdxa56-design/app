@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -26,8 +27,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
 
-    // الرابط الرسمي المستضاف للتطبيق
-    private static final String TARGET_URL = "https://ais-pre-yosagmel7qbtoq2pwhluao-475573028031.europe-west2.run.app/";
+    // الرابط المباشر للموقع المباشر المستضاف
+    private static final String TARGET_URL = "https://axp-kappa.vercel.app/";
     private static final int FILECHOOSER_RESULTCODE = 1001;
     private static final int PERMISSION_REQUEST_CODE = 2002;
 
@@ -42,8 +43,15 @@ public class MainActivity extends AppCompatActivity {
 
         mSwipeRefresh = new SwipeRefreshLayout(this);
         mWebView = new WebView(this);
-        mWebView.setBackgroundColor(Color.WHITE); // خلفية بيضاء لضمان الوضوح التام
         
+        mSwipeRefresh.setBackgroundColor(Color.WHITE);
+        mWebView.setBackgroundColor(Color.WHITE);
+        
+        // تفعيل التسريع العتادي مع خلفية ناصعة لمنع أي ظلال أو ضبابية أثناء النقر
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            mWebView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
+
         mSwipeRefresh.addView(mWebView);
         setContentView(mSwipeRefresh);
 
@@ -57,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setUseWideViewPort(true);
         webSettings.setBuiltInZoomControls(false);
         webSettings.setSupportZoom(false);
+        
+        // منع النوافذ المتعددة تلقائياً لمنع تعتيم الشاشة بفتحات جديدة
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setSupportMultipleWindows(false);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
@@ -79,25 +89,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                super.onReceivedHttpError(view, request, errorResponse);
-                if (request != null && request.isForMainFrame()) {
-                    int statusCode = errorResponse != null ? errorResponse.getStatusCode() : 0;
-                    if ((statusCode == 404 || statusCode >= 500) && request.getUrl() != null && !request.getUrl().toString().equals(TARGET_URL)) {
-                        view.loadUrl(TARGET_URL);
-                    }
-                }
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                super.onReceivedError(view, errorCode, description, failingUrl);
-                if (failingUrl != null && !failingUrl.equals(TARGET_URL)) {
-                    view.loadUrl(TARGET_URL);
-                }
-            }
-
-            @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url == null) return false;
 
@@ -112,18 +103,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // السماح بتحميل كافة روابط التطبيق وروابط المصادقة داخل الـ WebView مباشرة
+                // فتح كافة الروابط في نفس الشاشة بسلاسة وبدون تعتيم
                 if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") ||
                     url.contains("netlify.app") || url.contains("axp-kappa.vercel.app") ||
                     url.contains("firebaseapp.com") || url.contains("google.com") || url.contains("accounts.google")) {
-                    return false;
+                    view.loadUrl(url);
+                    return true;
                 }
 
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
                 } catch (Exception e) {
-                    return false;
+                    view.loadUrl(url);
+                    return true;
                 }
             }
 
@@ -140,6 +133,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
+            }
+
+            // توجيه طلبات فتح النوافذ المنبثقة مباشرة إلى mWebView لمنع طبقة الظل والضبابية
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(mWebView);
+                resultMsg.sendToTarget();
+                return true;
             }
 
             @Override
