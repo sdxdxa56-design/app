@@ -1114,7 +1114,7 @@ export default function AdminPortalModal({ onClose, onRefreshAds }: AdminPortalM
 
                   {/* Simulated visitor indicator */}
                   <div className="bg-slate-900 text-white rounded-2xl p-6 relative overflow-hidden shadow-md">
-                    <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full pointer-events-none"></div>
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                       <div>
                         <h4 className="text-sm font-black text-amber-400 flex items-center gap-1.5">
