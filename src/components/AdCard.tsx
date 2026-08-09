@@ -161,7 +161,7 @@ export default function AdCard({ ad, onAdClick, lang, isFavorite, onFavoriteTogg
           referrerPolicy="no-referrer"
         />
         {/* City tag on image bottom */}
-        <div className={`absolute bottom-1.5 ${lang === 'ar' ? 'right-1.5' : 'left-1.5'} bg-slate-900/75 text-white px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5 backdrop-blur-xs`}>
+        <div className={`absolute bottom-1.5 ${lang === 'ar' ? 'right-1.5' : 'left-1.5'} bg-slate-900/85 text-white px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5`}>
           <MapPin className="w-2.5 h-2.5 text-amber-400" />
           <span>{ad.city}</span>
         </div>
