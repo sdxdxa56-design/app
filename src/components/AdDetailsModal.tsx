@@ -315,7 +315,7 @@ export default function AdDetailsModal({ ad, onClose, onStartChat, lang, current
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 overflow-y-auto" dir={lang === 'ar' ? 'rtl' : 'ltr'} id="addetails_modal">
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity" onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/75 transition-opacity" onClick={onClose} aria-hidden="true" />
       <Helmet>
         <title>{ad.title} | السوق المفتوح اليمن</title>
         <meta name="description" content={ad.description?.substring(0, 160) || ''} />
