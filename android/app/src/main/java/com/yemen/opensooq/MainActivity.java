@@ -2,15 +2,11 @@ package com.yemen.opensooq;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -36,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private WebView mWebView;
     private SwipeRefreshLayout mSwipeRefresh;
     private ValueCallback<Uri[]> mFilePathCallback;
-    private Dialog mPopupDialog; // متغير لحفظ النافذة المنبثقة
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -59,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setBuiltInZoomControls(false);
         webSettings.setSupportZoom(false);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setSupportMultipleWindows(true);
+        // إلغاء دعم النوافذ المتعددة لمنع ظهور أية نوافذ حوارية أو شاشة ضبابية عند الضغط
+        webSettings.setSupportMultipleWindows(false);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
@@ -113,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // السماح بجميع روابط المنصة وروابط المصادقة بالمرور
+                // السماح بجميع الروابط بالتحميل المباشر داخل نفس الـ WebView بدون فتح متصفح خارجي أو نوافذ فرعية
                 if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") ||
                     url.contains("netlify.app") || url.contains("axp-kappa.vercel.app") ||
                     url.contains("firebaseapp.com") || url.contains("google.com") || url.contains("accounts.google")) {
@@ -135,65 +131,27 @@ public class MainActivity extends AppCompatActivity {
                 callback.invoke(origin, true, false);
             }
 
-            // =================================================================
-            // [الإصلاح الرئيسي] عرض النافذة المنبثقة داخل Dialog ليراها المستخدم
-            // =================================================================
+            // توجيه أي طلب فتح نافذة جديدة تلقائياً إلى الـ WebView الرئيسي لمنع الشاشة الضبابية
             @Override
             public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
-                // 1. إنشاء WebView جديد للنافذة المنبثقة
-                WebView popupWebView = new WebView(MainActivity.this);
-                WebSettings popupSettings = popupWebView.getSettings();
-                popupSettings.setJavaScriptEnabled(true);
-                popupSettings.setDomStorageEnabled(true);
-                popupSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-                popupSettings.setUserAgentString(customUA);
-
-                popupWebView.setWebChromeClient(new WebChromeClient() {
+                WebView newWebView = new WebView(view.getContext());
+                newWebView.setWebViewClient(new WebViewClient() {
                     @Override
-                    public void onCloseWindow(WebView window) {
-                        // عند إغلاق النافذة، نغلق الـ Dialog
-                        if (mPopupDialog != null && mPopupDialog.isShowing()) {
-                            mPopupDialog.dismiss();
-                            mPopupDialog = null;
-                        }
-                    }
-                });
-
-                popupWebView.setWebViewClient(new WebViewClient() {
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                        view.loadUrl(url);
+                    public boolean shouldOverrideUrlLoading(WebView view2, String url) {
+                        mWebView.loadUrl(url);
                         return true;
                     }
-
                     @Override
-                    public void onPageFinished(WebView view, String url) {
-                        super.onPageFinished(view, url);
+                    public boolean shouldOverrideUrlLoading(WebView view2, WebResourceRequest request) {
+                        if (request != null && request.getUrl() != null) {
+                            mWebView.loadUrl(request.getUrl().toString());
+                        }
+                        return true;
                     }
                 });
-
-                // 2. إنشاء Dialog (نافذة حوارية) لعرض الـ WebView الجديد
-                mPopupDialog = new Dialog(MainActivity.this);
-                mPopupDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                mPopupDialog.setContentView(popupWebView, new ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT));
-                mPopupDialog.setCancelable(true);
-                mPopupDialog.setOnCancelListener(dialog -> {
-                    // عند الضغط على زر الرجوع، أغلق النافذة ونظفها
-                    if (mPopupDialog != null) {
-                        mPopupDialog.dismiss();
-                        mPopupDialog = null;
-                    }
-                });
-
-                mPopupDialog.show();
-
-                // 3. ربط الـ WebView الجديد بالرسالة الأصلية
                 WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-                transport.setWebView(popupWebView);
+                transport.setWebView(newWebView);
                 resultMsg.sendToTarget();
-
                 return true;
             }
 
@@ -258,10 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mPopupDialog != null && mPopupDialog.isShowing()) {
-            mPopupDialog.dismiss();
-            mPopupDialog = null;
-        } else if (mWebView != null && mWebView.canGoBack()) {
+        if (mWebView != null && mWebView.canGoBack()) {
             mWebView.goBack();
         } else {
             super.onBackPressed();
