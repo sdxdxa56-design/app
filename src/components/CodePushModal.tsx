@@ -93,7 +93,7 @@ export default function CodePushModal({ isOpen, onClose, lang = 'ar' }: CodePush
   return (
     <div className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-fade-in" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-950/80 transition-opacity" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/65 transition-opacity" onClick={onClose} aria-hidden="true" />
 
       {/* Main Dialog */}
       <div className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-right z-10 flex flex-col my-auto">
