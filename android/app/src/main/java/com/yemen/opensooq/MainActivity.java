@@ -2,6 +2,7 @@ package com.yemen.opensooq;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         
         // السماح بالجيل الجديد من الويب وإدارة النوافذ والشبكة
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setSupportMultipleWindows(false);
+        webSettings.setSupportMultipleWindows(true);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
@@ -162,11 +163,57 @@ public class MainActivity extends AppCompatActivity {
                 callback.invoke(origin, true, false);
             }
 
-            // توجيه طلبات فتح النوافذ المنبثقة مباشرة إلى mWebView لمنع طبقة الظل والضبابية
+            // فتح النوافذ المنبثقة بشكل صحيح داخل Dialog لمنع تعليق النظام أو ظهور الشاشة الضبابية
             @Override
             public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                WebView popupWebView = new WebView(MainActivity.this);
+                WebSettings popupWebSettings = popupWebView.getSettings();
+                popupWebSettings.setJavaScriptEnabled(true);
+                popupWebSettings.setDomStorageEnabled(true);
+                popupWebSettings.setDatabaseEnabled(true);
+                popupWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+                popupWebSettings.setSupportMultipleWindows(true);
+
+                CookieManager cookieManager = CookieManager.getInstance();
+                cookieManager.setAcceptCookie(true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    cookieManager.setAcceptThirdPartyCookies(popupWebView, true);
+                }
+
+                Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                dialog.setContentView(popupWebView);
+                dialog.show();
+
+                popupWebView.setWebChromeClient(new WebChromeClient() {
+                    @Override
+                    public void onCloseWindow(WebView window) {
+                        dialog.dismiss();
+                    }
+                });
+
+                popupWebView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                        if (url != null && (url.startsWith("whatsapp://") || url.startsWith("tel:") || url.startsWith("mailto:"))) {
+                            try {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                                return true;
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        }
+                        return false;
+                    }
+                });
+
+                dialog.setOnDismissListener(d -> {
+                    try {
+                        popupWebView.destroy();
+                    } catch (Exception ignored) {}
+                });
+
                 WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-                transport.setWebView(mWebView);
+                transport.setWebView(popupWebView);
                 resultMsg.sendToTarget();
                 return true;
             }
