@@ -131,7 +131,7 @@ jobs:
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="fixed inset-0 bg-slate-950/80 transition-opacity" onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/65 transition-opacity" onClick={onClose} aria-hidden="true" />
       <div className="relative bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl overflow-hidden my-auto flex flex-col z-10">
         
         {/* Header */}
