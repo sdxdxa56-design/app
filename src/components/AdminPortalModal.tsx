@@ -859,7 +859,7 @@ export default function AdminPortalModal({ onClose, onRefreshAds }: AdminPortalM
 
   return (
     <div className="fixed inset-0 z-[99999] overflow-y-auto flex items-center justify-center p-3 sm:p-6 text-right" dir="rtl" id="admin_portal_modal_backdrop">
-      <div className="fixed inset-0 bg-slate-950/80 transition-opacity" onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/65 transition-opacity" onClick={onClose} aria-hidden="true" />
       <div className="relative bg-white rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] z-10 my-auto" id="admin_portal_content_container">
         
         {/* Header bar */}
