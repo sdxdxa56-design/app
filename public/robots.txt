@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Sitemap: https://fgh-x4h9.vercel.app/sitemap.xml
 Sitemap: https://axp-kappa.vercel.app/sitemap.xml
 
 # روابط مهمة للفهرسة
