@@ -9,12 +9,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
+import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -55,6 +56,13 @@ public class MainActivity extends AppCompatActivity {
         mSwipeRefresh.addView(mWebView);
         setContentView(mSwipeRefresh);
 
+        // تفعيل ملفات الكوكيز والارتباط للطرف الثالث (ضروري جداً لتسجيل دخول جوجل و Firebase دون شاشة بيضاء أو ضبابية)
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            cookieManager.setAcceptThirdPartyCookies(mWebView, true);
+        }
+
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
@@ -66,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setBuiltInZoomControls(false);
         webSettings.setSupportZoom(false);
         
-        // منع النوافذ المتعددة تلقائياً لمنع تعتيم الشاشة بفتحات جديدة
+        // السماح بالجيل الجديد من الويب وإدارة النوافذ والشبكة
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setSupportMultipleWindows(false);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
@@ -89,34 +97,53 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, android.net.http.SslError error) {
+                // السماح باستمرار الاتصال في حال وجود شهادات مؤقتة لمنع التجمد
+                handler.proceed();
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                mSwipeRefresh.setRefreshing(false);
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url == null) return false;
 
+                // التعامل مع الروابط الخاصة والتطبيقات الخارجية (واتساب، اتصال، إيميل)
                 if (url.startsWith("whatsapp://") || url.startsWith("https://wa.me/") ||
-                    url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("geo:")) {
+                    url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("geo:") ||
+                    url.startsWith("intent://")) {
                     try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                        return true;
+                        Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                        if (intent != null) {
+                            startActivity(intent);
+                            return true;
+                        }
                     } catch (Exception e) {
-                        Toast.makeText(MainActivity.this, "تعذر فتح التطبيق المطلوب", Toast.LENGTH_SHORT).show();
-                        return true;
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                            return true;
+                        } catch (Exception ex) {
+                            Toast.makeText(MainActivity.this, "تعذر فتح التطبيق المطلوب", Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
                     }
                 }
 
-                // فتح كافة الروابط في نفس الشاشة بسلاسة وبدون تعتيم
-                if (url.contains("ais-pre-") || url.contains("run.app") || url.contains("vercel.app") ||
-                    url.contains("netlify.app") || url.contains("axp-kappa.vercel.app") ||
-                    url.contains("firebaseapp.com") || url.contains("google.com") || url.contains("accounts.google")) {
-                    view.loadUrl(url);
-                    return true;
+                // إرجاع false لجميع روابط HTTP/HTTPS لجعل الـ WebView يعالجها تلقائياً بالكامل
+                // هذا يضمن الحفاظ على جلسة الكوكيز ورؤوس طلبات تسجيل الدخول (Google Auth) لمنع الشاشة الضبابية
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    return false;
                 }
 
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
                 } catch (Exception e) {
-                    view.loadUrl(url);
-                    return true;
+                    return false;
                 }
             }
 
@@ -212,3 +239,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+
