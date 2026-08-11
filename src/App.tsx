@@ -7,7 +7,7 @@ import AdDetailsModal from './components/AdDetailsModal';
 import SyncPanel from './components/SyncPanel';
 import { Ad, CATEGORIES, YEMENI_CITIES } from './types';
 import { INITIAL_ADS } from './data';
-import { getFirebaseAds, getFirebaseBanners, Banner, expressInterest, getFirebaseAlerts, SiteAlert, db, normalizePhone, checkGoogleRedirectResult } from './firebase';
+import { getFirebaseAds, getFirebaseAd, getFirebaseBanners, Banner, expressInterest, getFirebaseAlerts, SiteAlert, db, normalizePhone, checkGoogleRedirectResult } from './firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { Filter, SlidersHorizontal, RefreshCw, X, Heart, Shield, Sparkles, MapPin, Globe } from 'lucide-react';
 import SellerProfileModal from './components/SellerProfileModal';
@@ -326,7 +326,6 @@ export default function App() {
         const adId = path.substring(4);
         if (adId) {
           try {
-            const { getFirebaseAd } = await import('./firebase');
             const targetAd = await getFirebaseAd(adId);
             if (targetAd) {
               setActiveAdDetail(targetAd);
