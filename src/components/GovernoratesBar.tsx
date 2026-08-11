@@ -139,8 +139,9 @@ export default function GovernoratesBar({
 
       {/* Full Governorate Selection Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4 animate-fade-in" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-gray-200">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <div className="fixed inset-0 bg-black/65 transition-opacity" onClick={() => setIsModalOpen(false)} aria-hidden="true" />
+          <div className="relative bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-gray-200 z-10 my-auto">
             {/* Modal Header */}
             <div className="p-5 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
