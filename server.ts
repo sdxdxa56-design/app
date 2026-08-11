@@ -1602,9 +1602,13 @@ app.get("/ad/:id", async (req, res) => {
 
     let html = fs.readFileSync(templatePath, 'utf8');
 
+    const currentHost = req.headers.host || "fgh-x4h9.vercel.app";
+    const currentProtocol = req.headers["x-forwarded-proto"] || "https";
+    const baseUrl = `${currentProtocol}://${currentHost}`;
+
     // Replace basic title tag
     html = html.replace(
-      `<title>السوق المفتوح اليمن - سيارات، عقارات، جوالات، وظائف ومبيعات</title>`,
+      `<title>سوق اليمن المفتوح - سيارات، عقارات، جوالات، وظائف ومبيعات</title>`,
       `<title>${title}</title>`
     );
 
@@ -1615,13 +1619,13 @@ app.get("/ad/:id", async (req, res) => {
       <meta property="og:title" content="${title}" />
       <meta property="og:description" content="${description}" />
       <meta property="og:image" content="${image}" />
-      <meta property="og:url" content="https://app.vercel.app/ad/${adId}" />
+      <meta property="og:url" content="${baseUrl}/ad/${adId}" />
       <meta property="og:type" content="website" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="${title}" />
       <meta name="twitter:description" content="${description}" />
       <meta name="twitter:image" content="${image}" />
-      <link rel="canonical" href="https://app.vercel.app/ad/${adId}" />
+      <link rel="canonical" href="${baseUrl}/ad/${adId}" />
       ${jsonLdString}
     `;
 
@@ -1635,30 +1639,42 @@ app.get("/ad/:id", async (req, res) => {
   }
 });
 
-// Robots.txt route
+// Robots.txt route (Dynamic per domain)
 app.get("/robots.txt", (req, res) => {
+  const currentHost = req.headers.host || "fgh-x4h9.vercel.app";
+  const currentProtocol = req.headers["x-forwarded-proto"] || "https";
+  const baseUrl = `${currentProtocol}://${currentHost}`;
+
   res.type("text/plain");
   res.send(`User-agent: *
 Allow: /
 Allow: /ad/*
 Allow: /category/*
+Allow: /city/*
 Disallow: /admin
 Disallow: /api/
-Sitemap: https://axp-kappa.vercel.app/sitemap.xml`);
+Sitemap: ${baseUrl}/sitemap.xml`);
 });
 
-// Dynamic sitemap.xml route
+// Dynamic sitemap.xml route (Dynamic per domain)
 app.get("/sitemap.xml", async (req, res) => {
+  const currentHost = req.headers.host || "fgh-x4h9.vercel.app";
+  const currentProtocol = req.headers["x-forwarded-proto"] || "https";
+  const baseUrl = `${currentProtocol}://${currentHost}`;
+
   res.header("Content-Type", "application/xml; charset=utf-8");
   res.header("Cache-Control", "public, max-age=3600");
+  
   let urls = [
-    '<url><loc>https://axp-kappa.vercel.app/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>',
-    '<url><loc>https://axp-kappa.vercel.app/category/cars</loc><priority>0.9</priority><changefreq>daily</changefreq></url>',
-    '<url><loc>https://axp-kappa.vercel.app/category/properties</loc><priority>0.9</priority><changefreq>daily</changefreq></url>',
-    '<url><loc>https://axp-kappa.vercel.app/category/mobiles</loc><priority>0.9</priority><changefreq>daily</changefreq></url>',
-    '<url><loc>https://axp-kappa.vercel.app/category/jobs</loc><priority>0.9</priority><changefreq>daily</changefreq></url>',
-    '<url><loc>https://axp-kappa.vercel.app/category/furniture</loc><priority>0.9</priority><changefreq>daily</changefreq></url>',
-    '<url><loc>https://axp-kappa.vercel.app/category/electronics</loc><priority>0.9</priority><changefreq>daily</changefreq></url>'
+    `<url><loc>${baseUrl}/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/cars</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/properties</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/mobiles</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/jobs</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/furniture</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/electronics</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/%D8%B7%D8%A7%D9%82%D8%A9%20%D8%B4%D9%85%D8%B3%D9%8A%D8%A9</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`,
+    `<url><loc>${baseUrl}/category/%D8%AE%D8%AF%D9%85%D8%A7%D8%AA</loc><priority>0.9</priority><changefreq>daily</changefreq></url>`
   ];
 
   try {
@@ -1672,7 +1688,7 @@ app.get("/sitemap.xml", async (req, res) => {
         const id = parts[parts.length - 1];
         if (id) {
           urls.push(`<url>
-            <loc>https://axp-kappa.vercel.app/ad/${id}</loc>
+            <loc>${baseUrl}/ad/${id}</loc>
             <changefreq>weekly</changefreq>
             <priority>0.8</priority>
           </url>`);
