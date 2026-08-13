@@ -13,15 +13,14 @@ const PORT = 3000;
 
 app.use(express.json({ limit: "50mb" }));
 
-// Security Headers Middleware (Allowing iframe embedding for AI Studio preview)
+// Security Headers Middleware (Allowing iframe embedding and external integrations)
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googleapis.com https://ajsj-35a36.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https: http:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseapp.com https://*.googleapis.com wss:; frame-src 'self' https://ajsj-35a36.firebaseapp.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self';"
+    "default-src 'self' https: http: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; style-src 'self' 'unsafe-inline' https: http:; font-src 'self' https: http: data:; img-src 'self' data: blob: https: http:; connect-src 'self' https: http: wss: ws: data: blob:; frame-src 'self' https: http:; object-src 'none'; base-uri 'self'; form-action 'self';"
   );
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
   next();
 });
