@@ -29,8 +29,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
 
-    // الرابط المباشر للموقع المباشر المستضاف
-    private static final String TARGET_URL = "https://axp-kappa.vercel.app/";
+    // الرابط المباشر للموقع المستضاف (النطاق الجديد والسريع)
+    private static final String TARGET_URL = "https://fgh-x4h9.vercel.app/";
     private static final int FILECHOOSER_RESULTCODE = 1001;
     private static final int PERMISSION_REQUEST_CODE = 2002;
 
@@ -48,16 +48,14 @@ public class MainActivity extends AppCompatActivity {
         
         mSwipeRefresh.setBackgroundColor(Color.WHITE);
         mWebView.setBackgroundColor(Color.WHITE);
-        
-        // تفعيل التسريع العتادي مع خلفية ناصعة لمنع أي ظلال أو ضبابية أثناء النقر
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            mWebView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        }
+
+        // منع تداخل التمرير والسحب بين SwipeRefresh و WebView لتجنب تعليق اللمس
+        mSwipeRefresh.setOnChildScrollUpCallback((parent, child) -> mWebView != null && mWebView.getScrollY() > 0);
 
         mSwipeRefresh.addView(mWebView);
         setContentView(mSwipeRefresh);
 
-        // تفعيل ملفات الكوكيز والارتباط للطرف الثالث (ضروري جداً لتسجيل دخول جوجل و Firebase دون شاشة بيضاء أو ضبابية)
+        // تفعيل ملفات الكوكيز والارتباط للطرف الثالث
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -70,19 +68,25 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setDatabaseEnabled(true);
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
-        webSettings.setLoadWithOverviewMode(true);
+
+        // تفعيل وضع سطح المكتب الواسع (Desktop View) بدقة عالية ومساحة كاملة
         webSettings.setUseWideViewPort(true);
-        webSettings.setBuiltInZoomControls(false);
-        webSettings.setSupportZoom(false);
-        
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
+        webSettings.setTextZoom(100);
+        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+
         // السماح بالجيل الجديد من الويب وإدارة النوافذ والشبكة
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setSupportMultipleWindows(true);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        String customUA = "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36";
-        webSettings.setUserAgentString(customUA);
+        // معرف متصفح سطح المكتب الكامل (Desktop Chrome User Agent)
+        String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+        webSettings.setUserAgentString(desktopUA);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
