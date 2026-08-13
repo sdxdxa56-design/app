@@ -91,7 +91,7 @@ export default function AdDetailsModal({ ad, onClose, onStartChat, lang, current
     setMapReady(false);
     const timer = setTimeout(() => {
       setMapReady(true);
-    }, 1000);
+    }, 10);
     return () => clearTimeout(timer);
   }, [ad.id]);
 
