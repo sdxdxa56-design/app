@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import AdCard from './components/AdCard';
@@ -66,6 +66,15 @@ export default function App() {
 
   // Modal visibility states
   const [activeAdDetail, setActiveAdDetail] = useState<Ad | null>(null);
+  const activeAdDetailRef = useRef(activeAdDetail);
+  useEffect(() => {
+    activeAdDetailRef.current = activeAdDetail;
+  }, [activeAdDetail]);
+
+  const adsRef = useRef(ads);
+  useEffect(() => {
+    adsRef.current = ads;
+  }, [ads]);
   const [showPostModal, setShowPostModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -321,32 +330,33 @@ export default function App() {
       setCurrentPath(path);
       if (path === '/admin') {
         setShowAdminModal(true);
-        setActiveAdDetail(null);
       } else if (path.startsWith('/ad/')) {
         const adId = path.substring(4);
         if (adId) {
+          // If modal is already showing this exact ad, do not clear or re-fetch
+          if (activeAdDetailRef.current && activeAdDetailRef.current.id === adId) {
+            return;
+          }
+          // Try finding in currently loaded ads list first
+          const localMatch = adsRef.current.find(a => a.id === adId);
+          if (localMatch) {
+            setActiveAdDetail(localMatch);
+            return;
+          }
           try {
             const targetAd = await getFirebaseAd(adId);
             if (targetAd) {
               setActiveAdDetail(targetAd);
-            } else {
-              setActiveAdDetail(null);
             }
           } catch (e) {
             console.warn("Failed to resolve ad from deep link:", e);
-            setActiveAdDetail(null);
           }
-        } else {
-          setActiveAdDetail(null);
         }
       } else if (path.startsWith('/category/')) {
-        setActiveAdDetail(null);
         const parts = path.split('/').filter(Boolean);
         if (parts[1]) {
           setSelectedCategory(parts[1]);
         }
-      } else {
-        setActiveAdDetail(null);
       }
     };
 
@@ -558,10 +568,10 @@ export default function App() {
       />
 
       <Routes>
-        <Route path="/category/:category" element={<CategoryPage />} />
-        <Route path="/category/:category/:subcategory" element={<CategoryPage />} />
-        <Route path="/city/:city" element={<CategoryPage />} />
-        <Route path="/city/:city/:category" element={<CategoryPage />} />
+        <Route path="/category/:category" element={<CategoryPage onAdClick={(ad) => setActiveAdDetail(ad)} />} />
+        <Route path="/category/:category/:subcategory" element={<CategoryPage onAdClick={(ad) => setActiveAdDetail(ad)} />} />
+        <Route path="/city/:city" element={<CategoryPage onAdClick={(ad) => setActiveAdDetail(ad)} />} />
+        <Route path="/city/:city/:category" element={<CategoryPage onAdClick={(ad) => setActiveAdDetail(ad)} />} />
         <Route path="/account" element={<MyAccountPage />} />
         <Route path="/my-account" element={<MyAccountPage />} />
         <Route path="/about" element={<About />} />
