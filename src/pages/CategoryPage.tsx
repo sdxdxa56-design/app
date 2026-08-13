@@ -4,7 +4,11 @@ import { getFirebaseAds } from '../firebase';
 import AdCard from '../components/AdCard';
 import { Ad } from '../types';
 
-export default function CategoryPage() {
+interface CategoryPageProps {
+  onAdClick?: (ad: Ad) => void;
+}
+
+export default function CategoryPage({ onAdClick }: CategoryPageProps) {
   const params = useParams();
   
   // Safe parsing of params from path as backup for URL direct visits/state-router integration
@@ -149,8 +153,12 @@ export default function CategoryPage() {
                   onFavoriteToggle={() => {}}
                   onAdClick={(clickedAd) => {
                     clickedAd.views = (clickedAd.views || 0) + 1;
-                    window.history.pushState(null, '', `/ad/${clickedAd.id}`);
-                    window.dispatchEvent(new PopStateEvent('popstate'));
+                    if (onAdClick) {
+                      onAdClick(clickedAd);
+                    }
+                    if (clickedAd.id) {
+                      window.history.pushState(null, '', `/ad/${clickedAd.id}`);
+                    }
                   }}
                 />
               ))}
