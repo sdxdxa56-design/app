@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
 
-        // تفعيل وضع سطح المكتب الواسع (Desktop View) بدقة عالية ومساحة كاملة
+        // تفعيل وضع سطح المكتب الواسع والمصغر (Desktop View Scaled) بدقة عالية ومساحة كاملة
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setSupportZoom(true);
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setDisplayZoomControls(false);
         webSettings.setTextZoom(100);
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        mWebView.setInitialScale(0);
 
         // السماح بالجيل الجديد من الويب وإدارة النوافذ والشبكة
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
@@ -99,6 +100,20 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 mSwipeRefresh.setRefreshing(false);
+
+                // تصغير العرض المكتبي ليتناسب مع الشاشة أفقياً تماماً كمتصفح Brave/Chrome في وضع سطح المكتب
+                view.evaluateJavascript(
+                    "try {" +
+                    "  var meta = document.querySelector('meta[name=\"viewport\"]');" +
+                    "  if (meta) {" +
+                    "    meta.setAttribute('content', 'width=1180, initial-scale=0.35, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes');" +
+                    "  } else {" +
+                    "    var m = document.createElement('meta');" +
+                    "    m.name = 'viewport';" +
+                    "    m.content = 'width=1180, initial-scale=0.35, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes';" +
+                    "    document.head.appendChild(m);" +
+                    "  }" +
+                    "} catch(e) {}", null);
             }
 
             @Override
