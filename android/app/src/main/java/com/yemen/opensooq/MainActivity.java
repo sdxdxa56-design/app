@@ -29,7 +29,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
 
-    // الرابط المباشر للموقع المستضاف (النطاق الجديد والسريع)
     private static final String TARGET_URL = "https://fgh-x4h9.vercel.app/";
     private static final int FILECHOOSER_RESULTCODE = 1001;
     private static final int PERMISSION_REQUEST_CODE = 2002;
@@ -49,13 +48,11 @@ public class MainActivity extends AppCompatActivity {
         mSwipeRefresh.setBackgroundColor(Color.WHITE);
         mWebView.setBackgroundColor(Color.WHITE);
 
-        // منع تداخل التمرير والسحب بين SwipeRefresh و WebView لتجنب تعليق اللمس
         mSwipeRefresh.setOnChildScrollUpCallback((parent, child) -> mWebView != null && mWebView.getScrollY() > 0);
 
         mSwipeRefresh.addView(mWebView);
         setContentView(mSwipeRefresh);
 
-        // تفعيل ملفات الكوكيز والارتباط للطرف الثالث
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -69,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
 
-        // تفعيل وضع سطح المكتب الواسع والمصغر (Desktop View Scaled) بدقة عالية ومساحة كاملة
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setSupportZoom(true);
@@ -79,13 +75,11 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         mWebView.setInitialScale(0);
 
-        // السماح بالجيل الجديد من الويب وإدارة النوافذ والشبكة
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setSupportMultipleWindows(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(false);
+        webSettings.setSupportMultipleWindows(false); // التعديل الحاسم
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // معرف متصفح سطح المكتب الكامل (Desktop Chrome User Agent)
         String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
         webSettings.setUserAgentString(desktopUA);
 
@@ -100,25 +94,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 mSwipeRefresh.setRefreshing(false);
-
-                // تصغير العرض المكتبي ليتناسب مع الشاشة أفقياً تماماً كمتصفح Brave/Chrome في وضع سطح المكتب
-                view.evaluateJavascript(
-                    "try {" +
-                    "  var meta = document.querySelector('meta[name=\"viewport\"]');" +
-                    "  if (meta) {" +
-                    "    meta.setAttribute('content', 'width=1180, initial-scale=0.35, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes');" +
-                    "  } else {" +
-                    "    var m = document.createElement('meta');" +
-                    "    m.name = 'viewport';" +
-                    "    m.content = 'width=1180, initial-scale=0.35, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes';" +
-                    "    document.head.appendChild(m);" +
-                    "  }" +
-                    "} catch(e) {}", null);
             }
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, android.net.http.SslError error) {
-                // السماح باستمرار الاتصال في حال وجود شهادات مؤقتة لمنع التجمد
                 handler.proceed();
             }
 
@@ -132,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url == null) return false;
 
-                // التعامل مع الروابط الخاصة والتطبيقات الخارجية (واتساب، اتصال، إيميل)
                 if (url.startsWith("whatsapp://") || url.startsWith("https://wa.me/") ||
                     url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("geo:") ||
                     url.startsWith("intent://")) {
@@ -153,8 +131,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // إرجاع false لجميع روابط HTTP/HTTPS لجعل الـ WebView يعالجها تلقائياً بالكامل
-                // هذا يضمن الحفاظ على جلسة الكوكيز ورؤوس طلبات تسجيل الدخول (Google Auth) لمنع الشاشة الضبابية
                 if (url.startsWith("http://") || url.startsWith("https://")) {
                     return false;
                 }
@@ -182,59 +158,9 @@ public class MainActivity extends AppCompatActivity {
                 callback.invoke(origin, true, false);
             }
 
-            // فتح النوافذ المنبثقة بشكل صحيح داخل Dialog لمنع تعليق النظام أو ظهور الشاشة الضبابية
             @Override
             public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
-                WebView popupWebView = new WebView(MainActivity.this);
-                WebSettings popupWebSettings = popupWebView.getSettings();
-                popupWebSettings.setJavaScriptEnabled(true);
-                popupWebSettings.setDomStorageEnabled(true);
-                popupWebSettings.setDatabaseEnabled(true);
-                popupWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-                popupWebSettings.setSupportMultipleWindows(true);
-
-                CookieManager cookieManager = CookieManager.getInstance();
-                cookieManager.setAcceptCookie(true);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    cookieManager.setAcceptThirdPartyCookies(popupWebView, true);
-                }
-
-                Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-                dialog.setContentView(popupWebView);
-                dialog.show();
-
-                popupWebView.setWebChromeClient(new WebChromeClient() {
-                    @Override
-                    public void onCloseWindow(WebView window) {
-                        dialog.dismiss();
-                    }
-                });
-
-                popupWebView.setWebViewClient(new WebViewClient() {
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                        if (url != null && (url.startsWith("whatsapp://") || url.startsWith("tel:") || url.startsWith("mailto:"))) {
-                            try {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                                return true;
-                            } catch (Exception e) {
-                                return false;
-                            }
-                        }
-                        return false;
-                    }
-                });
-
-                dialog.setOnDismissListener(d -> {
-                    try {
-                        popupWebView.destroy();
-                    } catch (Exception ignored) {}
-                });
-
-                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-                transport.setWebView(popupWebView);
-                resultMsg.sendToTarget();
-                return true;
+                return false;
             }
 
             @Override
@@ -305,4 +231,3 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
-
